@@ -34,7 +34,7 @@ func main() {
 	for {
 		dataCh <- counter
 		counter++
-		time.Sleep(180 * time.Millisecond)
+		time.Sleep(1 * time.Second)
 	}
 
 }
