@@ -14,9 +14,9 @@ func setBit(n int64, i int, bit int) int64 {
 }
 
 func main() {
-	var num int64 = 6 // 5 в двоичной системе: 101
-	i := 1            // работаем с 1-м битом (считая с нуля)
-	value := 0        // устанавливаем в 0
+	var num int64 = 6
+	i := 1
+	value := 0
 
 	result := setBit(num, i, value)
 
