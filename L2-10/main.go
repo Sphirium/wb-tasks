@@ -11,6 +11,9 @@ import (
 	"strings"
 )
 
+// extractField извлекает N-е поле из строки, разделённой табуляцией.
+// Нумерация полей начинается с 1 (как в GNU sort).
+// Если N <= 0 или поле не существует — возвращается вся строка.
 func exctractField(line string, n int) string {
 	// Если номер поля <= 0 — используем всю строку (поведение по умолчанию)
 	if n <= 0 {
@@ -28,11 +31,33 @@ func exctractField(line string, n int) string {
 	return fields[n-1]
 }
 
+// removeDuplicates удаляет соседние дубликаты из ОТСОРТИРОВАННОГО среза.
+// Сравнивает ПОЛНЫЕ строки (как в оригинальном sort -u).
+func removeDuplicates(lines []string) []string {
+	if len(lines) == 0 {
+		return lines
+	}
+
+	// Результат начинается с первой строки
+	result := []string{lines[0]}
+
+	for i := 1; i < len(lines); i++ {
+		if lines[i] != lines[i-1] {
+			// Если текущая строка НЕ равна предыдущей — добавляем в результат
+			result = append(result, lines[i])
+		}
+		// Если равна — пропускаем (дубликат)
+	}
+	return result
+
+}
+
 func main() {
 	// Объявляем флаг -r (по умолчанию false)
 	reverse := flag.Bool("r", false, "сортировка в обратном порядке")
 	numeric := flag.Bool("n", false, "Числовая сортировка")
 	key := flag.Int("k", 0, "Сортировка по N-му полю(разделитель - табуляция)")
+	unique := flag.Bool("u", false, "выводить только уникальные строки")
 
 	// Парсим флаги ДО обращения к os.Args[1]
 	flag.Parse()
@@ -60,7 +85,7 @@ func main() {
 	}
 
 	// Сортируем с учётом флагов -r, -n, -k
-	sort.Slice(lines, func(i, j int) bool {
+	sort.SliceStable(lines, func(i, j int) bool {
 		a := exctractField(lines[i], *key)
 		b := exctractField(lines[j], *key)
 
@@ -81,6 +106,10 @@ func main() {
 		}
 		return a < b
 	})
+
+	if *unique {
+		lines = removeDuplicates(lines)
+	}
 
 	// Выводим результат
 	for _, line := range lines {
