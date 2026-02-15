@@ -11,13 +11,30 @@ import (
 	"strings"
 )
 
+func exctractField(line string, n int) string {
+	// Если номер поля <= 0 — используем всю строку (поведение по умолчанию)
+	if n <= 0 {
+		return line
+	}
+
+	// Разделяем строку по табуляции
+	fields := strings.Split(line, "\t")
+
+	// Проверяем, существует ли запрошенное поле
+	if n > len(fields) {
+		return ""
+	}
+
+	return fields[n-1]
+}
+
 func main() {
 	// Объявляем флаг -r (по умолчанию false)
 	reverse := flag.Bool("r", false, "сортировка в обратном порядке")
 	numeric := flag.Bool("n", false, "Числовая сортировка")
+	key := flag.Int("k", 0, "Сортировка по N-му полю(разделитель - табуляция)")
 
 	// Парсим флаги ДО обращения к os.Args[1]
-	// Важно: вызов должен быть до использования os.Args!
 	flag.Parse()
 
 	// Определяем источник ввода: файл или stdin
@@ -42,9 +59,10 @@ func main() {
 		log.Fatalf("Ошибка сканирования данных: %v", err)
 	}
 
-	// Сортируем строки подконтрольно
+	// Сортируем с учётом флагов -r, -n, -k
 	sort.Slice(lines, func(i, j int) bool {
-		a, b := lines[i], lines[j]
+		a := exctractField(lines[i], *key)
+		b := exctractField(lines[j], *key)
 
 		if *numeric {
 			numA, errA := strconv.ParseFloat(strings.TrimSpace(a), 64)
@@ -64,7 +82,7 @@ func main() {
 		return a < b
 	})
 
-	// 4. Выводим результат
+	// Выводим результат
 	for _, line := range lines {
 		fmt.Println(line)
 	}
